@@ -4,6 +4,7 @@ const crypto = require("crypto");
 const createTour = async (req, res) => {
   try {
     const {
+      itineraries,
       overview,
       vendor,
       vendorName,
@@ -26,10 +27,12 @@ const createTour = async (req, res) => {
       additionalInfo,
       tourType,
     } = req.body;
+    const itineraryArray = Object.values(itineraries);
 
     const existingTour = await Tour.findOne({ uuid: uuid });
 
     if (existingTour) {
+      existingTour.itineraries=itineraryArray;
       existingTour.tourType = tourType;
       existingTour.overview = overview;
       existingTour.status = status;
@@ -56,6 +59,7 @@ const createTour = async (req, res) => {
         .json({ message: "Tour updated successfully", tour: updatedTour });
     } else {
       const newTour = new Tour({
+        ...req.body, itineraries: itineraryArray ,
         overview,
         vendorName,
         vendor,
@@ -149,12 +153,25 @@ const getToursByLocationDate = async (req, res) => {
     const tours = await Tour.find();
     const filteredTours = tours.filter((tour) => tour.status !== "disabled");
 
-    const filteredToursByLocation = filteredTours.filter(
-      (tour) =>
-        tour.location && tour.location.toLowerCase() === location.toLowerCase()
-    );
+    const filteredToursByLocationAndName = filteredTours.filter((tour) => {
+      const tourLocation = tour.location && tour.location.toLowerCase();
+      const tourName = tour.name && tour.name.toLowerCase();
+ 
+    
+   
+      const searchTermWords = tourName.toLowerCase().split(" ");
+ 
+      const matchesSearchTerm = searchTermWords.some((word) =>
+        tourName.includes(word)
+      );
+   
+      
+      const matchesLocation = tourLocation === location.toLowerCase();
+    
+      return matchesSearchTerm || matchesLocation;
+    });
 
-    res.json(filteredToursByLocation);
+    res.json(filteredToursByLocationAndName);
   } catch (error) {
     console.error("Error updating tour:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -188,17 +205,13 @@ const getToursByFilter = async (req, res) => {
     });
 
     const filteredToursByDuration = filteredToursByPrice.filter((tour) => {
-      // Convert tour.duration to a number
       const tourDurationNumbers = tour.duration.match(/\d+/g);
       const tourDurationNumber = tourDurationNumbers ? parseInt(tourDurationNumbers.join(""), 10) : 0;
-      console.log(tourDurationNumber)
+  
       return durations.every((duration) => {
-        
-          
-          
-          return tourDurationNumber === duration;
+          return tourDurationNumber >= duration;
       });
-  });
+  })
   
 
     res.json(filteredToursByDuration);

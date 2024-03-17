@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+
 const tourDetailsSchema = new mongoose.Schema({
   uuid: {
     type: String,
@@ -130,6 +131,16 @@ const tourDetailsSchema = new mongoose.Schema({
       type: String,
     },
   ],
+  itineraries: [
+    {
+      title: { type: String },
+      durationMeal: { type: String },
+      image: { type: String },
+      description: { type: String },
+      day:{type:Number}
+    },
+  ],
+ 
 }
 );
 
