@@ -96,10 +96,62 @@ const createTour = async (req, res) => {
 };
 const getAllTours = async (req, res) => {
   try {
+    const { location, tourType, minPrice, maxPrice, durations } = req.body;
+
     const tours = await Tour.find();
     const filteredTours = tours.filter((tour) => tour.status !== "disabled");
 
-    res.status(200).json(filteredTours);
+    let filteredToursByLocationAndName = filteredTours;
+    if (location) {
+      console.log(location)
+      filteredToursByLocationAndName = filteredTours.filter((tour) => {
+        const tourLocation = tour.location && tour.location.toLowerCase();
+        const tourName = tour.name && tour.name.toLowerCase();
+        const matchesLocation = tourLocation === location.toLowerCase();
+
+        const searchTermWords = location.toLowerCase().split(" ");
+        const matchesSearchTerm = searchTermWords.every((word) =>
+          tourName.includes(word)
+        );
+        return matchesLocation || matchesSearchTerm;
+      });
+    }
+// console.log(filteredToursByLocationAndName)
+    let filteredToursByType = filteredToursByLocationAndName;
+    if (tourType && tourType.length > 0) {
+      filteredToursByType = filteredToursByLocationAndName.filter((tour) => {
+        return tourType.every((tourTypeItem) => {
+          return tour.tourType.includes(tourTypeItem);
+        });
+      });
+    }
+    
+
+    let filteredToursByPrice = filteredToursByType;
+    if (minPrice && maxPrice ) {
+      filteredToursByPrice = filteredToursByType.filter((tour) => {
+        const tourPrice = parseFloat(tour.cost);
+        return (
+          !isNaN(tourPrice) && tourPrice >= minPrice && tourPrice <= maxPrice
+        );
+      });
+    }
+    console.log(filteredToursByPrice)
+    let filteredToursByDuration = filteredToursByPrice;
+    if (durations && durations.length > 0) {
+      filteredToursByDuration = filteredToursByPrice.filter((tour) => {
+        const tourDurationNumbers = tour.duration.match(/\d+/g);
+        const tourDurationNumber = tourDurationNumbers
+          ? parseInt(tourDurationNumbers.join(""), 10)
+          : 0;
+
+        return durations.every((duration) => {
+          return tourDurationNumber >= duration;
+        });
+      });
+    }
+
+    res.status(200).json(filteredToursByDuration);
   } catch (error) {
     console.error("Error fetching tours:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -156,19 +208,18 @@ const getToursByLocationDate = async (req, res) => {
     const filteredToursByLocationAndName = filteredTours.filter((tour) => {
       const tourLocation = tour.location && tour.location.toLowerCase();
       const tourName = tour.name && tour.name.toLowerCase();
- 
     
-   
-      const searchTermWords = tourName.toLowerCase().split(" ");
- 
-      const matchesSearchTerm = searchTermWords.some((word) =>
+      // Check if the tour's location matches the provided location
+      const matchesLocation = tourLocation === location.toLowerCase();
+
+      // Check if all words in the search term match any word in the tour's name
+      const searchTermWords = location.toLowerCase().split(" ");
+      const matchesSearchTerm = searchTermWords.every((word) =>
         tourName.includes(word)
       );
-   
-      
-      const matchesLocation = tourLocation === location.toLowerCase();
-    
-      return matchesSearchTerm || matchesLocation;
+
+      // Return true only if both the location and search term match
+      return matchesLocation || matchesSearchTerm;
     });
 
     res.json(filteredToursByLocationAndName);
@@ -177,6 +228,7 @@ const getToursByLocationDate = async (req, res) => {
     res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 const getToursByFilter = async (req, res) => {
   try {
     const { location, date } = req.params;
@@ -228,6 +280,6 @@ module.exports = {
   getToursForVendor,
   getTourDetails,
   updateTour,
-  getToursByLocationDate,
+  // getToursByLocationDate,
   getToursByFilter,
 };

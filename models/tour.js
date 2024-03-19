@@ -134,7 +134,12 @@ const tourDetailsSchema = new mongoose.Schema({
   itineraries: [
     {
       title: { type: String },
-      durationMeal: { type: String },
+      duration: { type: String },
+      meals: [
+        {
+          type: String,
+        },
+      ],
       image: { type: String },
       description: { type: String },
       day:{type:Number}
