@@ -1,6 +1,6 @@
 const { connect } = require("mongoose");
 const Tour = require("../models/tour");
-const crypto = require("crypto");
+
 const createTour = async (req, res) => {
   try {
     const {
@@ -103,7 +103,7 @@ const getAllTours = async (req, res) => {
 
     let filteredToursByLocationAndName = filteredTours;
     if (location) {
-      console.log(location)
+    
       filteredToursByLocationAndName = filteredTours.filter((tour) => {
         const tourLocation = tour.location && tour.location.toLowerCase();
         const tourName = tour.name && tour.name.toLowerCase();
@@ -116,7 +116,7 @@ const getAllTours = async (req, res) => {
         return matchesLocation || matchesSearchTerm;
       });
     }
-// console.log(filteredToursByLocationAndName)
+
     let filteredToursByType = filteredToursByLocationAndName;
     if (tourType && tourType.length > 0) {
       filteredToursByType = filteredToursByLocationAndName.filter((tour) => {
@@ -136,7 +136,7 @@ const getAllTours = async (req, res) => {
         );
       });
     }
-    console.log(filteredToursByPrice)
+ 
     let filteredToursByDuration = filteredToursByPrice;
     if (durations && durations.length > 0) {
       filteredToursByDuration = filteredToursByPrice.filter((tour) => {
@@ -171,8 +171,11 @@ const getToursForVendor = async (req, res) => {
 const getTourDetails = async (req, res) => {
   try {
     const tourId = req.params.tourId;
+  console.log(tourId)
     const tours = await Tour.find({ uuid: tourId });
-    res.status(200).json(tours);
+   
+    res.status(200).json(tours) 
+  
   } catch (error) {
     console.error("Error fetching vendor tours:", error);
     res.status(500).json({ error: "Internal Server Error" });
@@ -184,7 +187,6 @@ const updateTour = async (req, res) => {
 
     const updatedTour = await Tour.findOneAndUpdate(
       { uuid: tourId },
-
       req.body
     );
 
@@ -208,17 +210,11 @@ const getToursByLocationDate = async (req, res) => {
     const filteredToursByLocationAndName = filteredTours.filter((tour) => {
       const tourLocation = tour.location && tour.location.toLowerCase();
       const tourName = tour.name && tour.name.toLowerCase();
-    
-      // Check if the tour's location matches the provided location
       const matchesLocation = tourLocation === location.toLowerCase();
-
-      // Check if all words in the search term match any word in the tour's name
       const searchTermWords = location.toLowerCase().split(" ");
       const matchesSearchTerm = searchTermWords.every((word) =>
         tourName.includes(word)
       );
-
-      // Return true only if both the location and search term match
       return matchesLocation || matchesSearchTerm;
     });
 
@@ -282,4 +278,5 @@ module.exports = {
   updateTour,
   // getToursByLocationDate,
   getToursByFilter,
+  
 };

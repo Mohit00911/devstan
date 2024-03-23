@@ -3,35 +3,48 @@ const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
   firstName: {
     type: String,
-    required: true,
+   
   },
   lastName: {
     type: String,
-    required: true,
+   
   },
- 
   email: {
     type: String,
-    required: true,
+   
     unique: true,
   },
   password: {
     type: String,
-    required: true,
+   
   },
- 
   accountType: {
     type: String,
+    
+  },
+  phone: {
+    type: String,
   
-    required: true,
   },
-  phone:{
+  confirmPassword: {
     type: String,
-    required: true
+   
   },
-  confirmPassword:{
+  addressLine1: {
     type: String,
-    required: true,
+  
+  },
+  addressLine2: {
+    type: String,
+  },
+  state: {
+    type: String,
+  },
+  postalCode: {
+    type: String,
+  },
+  specialRequests: {
+    type: String,
   },
   createdAt: {
     type: Date,
@@ -42,4 +55,3 @@ const userSchema = new mongoose.Schema({
 const User = mongoose.model('User', userSchema);
 
 module.exports = User;
-
