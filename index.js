@@ -40,6 +40,9 @@ app.post('/api/paymentVerification', paymentController.paymentVerification);
 app.post('/api/userBooking', paymentController.userBooking);
 app.post('/api/getBookedUserDetails', paymentController.getBookedUserDetails);
 app.post('/api/getBookedTours/:vendorId', paymentController.getBookedToursByVendor);
+app.post('/api/updateTourStatus', paymentController.updateBookedToursByVendor);
+
+
 app.post('/api/getBookedToursbyUser/:userId', paymentController.getBookedToursByUser);
 // app.get('/api/tours/:location/:date', tourController.getToursByLocationDate);
 app.post('/api/tours/:location/:date', tourController.getToursByFilter);

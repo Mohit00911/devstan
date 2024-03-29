@@ -38,13 +38,11 @@ const paymentVerification = async (req, res) => {
 
     if (expectedSignature === razorpay_signature) {
       console.log("Payment verification successful");
-      res
-        .status(200)
-        .json({
-          message: "Payment verification successful",
-          orderId: razorpay_order_id,
-          paymentId: razorpay_payment_id,
-        });
+      res.status(200).json({
+        message: "Payment verification successful",
+        orderId: razorpay_order_id,
+        paymentId: razorpay_payment_id,
+      });
     } else {
       console.log("Payment verification failed");
       res.status(400).json({ error: "Payment verification failed" });
@@ -71,8 +69,7 @@ const userBooking = async (req, res) => {
       bookedTour,
       vendorId,
       status,
-    tourName,
-  
+      tourName,
     } = req.body;
 
     const newUserBooking = new Booking({
@@ -89,11 +86,10 @@ const userBooking = async (req, res) => {
       bookedTour,
       vendorId,
       status,
-    tourName
+      tourName,
     });
 
     const newBooking = await newUserBooking.save();
-
 
     res
       .status(200)
@@ -110,11 +106,9 @@ const getBookedUserDetails = async (req, res) => {
     const bookedUserDetails = await Booking.findOne({ paymentId });
 
     if (!bookedUserDetails) {
-      return res
-        .status(404)
-        .json({
-          error: "No booking details found for the provided payment ID",
-        });
+      return res.status(404).json({
+        error: "No booking details found for the provided payment ID",
+      });
     }
 
     res.status(200).json({ bookedUserDetails });
@@ -124,34 +118,52 @@ const getBookedUserDetails = async (req, res) => {
   }
 };
 const getBookedToursByVendor = async (req, res) => {
-    try {
-        const { vendorId } = req.params;
-
-        // Assuming you have a Tour model and it's associated with a Vendor
-        const bookedTours = await Booking.find({ vendorId: vendorId });
-
-        
-        res.status(200).json({ bookedTours });
-    } catch (error) {
-        console.error("Error fetching user booking details:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+  try {
+    const { vendorId } = req.params;
+    const bookedTours = await Booking.find({ vendorId: vendorId });
+    res.status(200).json({ bookedTours });
+  } catch (error) {
+    console.error("Error fetching user booking details:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 const getBookedToursByUser = async (req, res) => {
-    try {
-        const { userId } = req.params;
-console.log(userId)
-        
-        const bookedTours = await Booking.find({ userId: userId });
-
-       
-        res.status(200).json({ bookedTours });
-    } catch (error) {
-        console.error("Error fetching user booking details:", error);
-        res.status(500).json({ error: "Internal Server Error" });
-    }
+  try {
+    const { userId } = req.params;
+    const bookedTours = await Booking.find({ userId: userId });
+    res.status(200).json({ bookedTours });
+  } catch (error) {
+    console.error("Error fetching user booking details:", error);
+    res.status(500).json({ error: "Internal Server Error" });
+  }
 };
 
+
+const updateBookedToursByVendor = async (req, res) => {
+  try {
+    const { orderId, newStatus } = req.body;
+
+   
+    const updatedTour = await Booking.findOneAndUpdate(
+      { orderId: orderId }, 
+      { status: newStatus }, 
+     
+    );
+
+    if (!updatedTour) {
+      return res.status(404).json({ error: 'Tour not found' });
+    }
+
+    console.log(`Status of tour with ID ${orderId} updated to ${newStatus}`);
+
+    res.status(200).json({ message: 'Tour status updated successfully', updatedTour });
+  } catch (error) {
+    console.error('Error updating tour status:', error);
+    res.status(500).json({ error: 'Failed to update tour status' });
+  }
+};
+
+module.exports = updateBookedToursByVendor;
 
 
 module.exports = {
@@ -160,5 +172,6 @@ module.exports = {
   userBooking,
   getBookedUserDetails,
   getBookedToursByVendor,
-  getBookedToursByUser
+  getBookedToursByUser,
+  updateBookedToursByVendor
 };
