@@ -3,8 +3,9 @@ const app = express();
 const bodyParser = require('body-parser');
 
 const authRouter = require('./controllers/auth.js');
-
 const tourController=require('./controllers/tour.js')
+// const imageUploader=require('./controllers/tour.js')
+const imageUploader=require('./controllers/cloudinary.js')
 const testimonials=require('./controllers/testimonials.js')
 const contactUs=require('./controllers/contactUs.js')
 const paymentController=require('./services/paymentService.js')
@@ -14,17 +15,13 @@ const uri = "mongodb+srv://rawat009111:fSQGtHMkkia3YhjZ@tours.qpddv9d.mongodb.ne
 const mongoose = require('mongoose');
 mongoose.connect(uri, { });
 const db = mongoose.connection;
-
 db.on('error', (err) => {
   console.error('Error connecting to MongoDB:', err);
 });
-
 db.once('open', () => {
   console.log('Connected to MongoDB');
 });
 app.use(cors());
-
-
 app.use(bodyParser.json());
 app.post('/user/signup', authRouter.signup);
 app.post('/user/login', authRouter.login);
@@ -41,8 +38,6 @@ app.post('/api/userBooking', paymentController.userBooking);
 app.post('/api/getBookedUserDetails', paymentController.getBookedUserDetails);
 app.post('/api/getBookedTours/:vendorId', paymentController.getBookedToursByVendor);
 app.post('/api/updateTourStatus', paymentController.updateBookedToursByVendor);
-
-
 app.post('/api/getBookedToursbyUser/:userId', paymentController.getBookedToursByUser);
 // app.get('/api/tours/:location/:date', tourController.getToursByLocationDate);
 app.post('/api/tours/:location/:date', tourController.getToursByFilter);
@@ -52,6 +47,9 @@ app.post('/api/vendorTours', tourController.getToursForVendor);
 app.put('/api/updateTour/:tourId', tourController.updateTour);
 app.get('/api/getTour/:tourId', tourController.getTourDetails);
 app.get('/api/getkey',(req,res)=>res.status(200).json("rzp_test_51M4AB2hSU08Ih"))
+app.get('/update', imageUploader.imageUpload);
+
+
 app.get('/', (req, res) => { 
   res.send('Hello, Express with MongoDB!');
 });
