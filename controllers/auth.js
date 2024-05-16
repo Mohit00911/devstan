@@ -125,7 +125,7 @@ const login = async (req, res) => {
 
 const getUser = async (req, res) => {
   try {
-    // Extract the token from the request body
+  
     const { token } = req.body;
 
     
@@ -149,10 +149,10 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    // Extract user details from the request body
-    const { _id, firstName, email, lastName, phone, addressLine1, addressLine2, state, postalCode, specialRequests } = req.body;
+   
+    const { _id, firstName, email, lastName, phone, addressLine1, addressLine2, state,city,country, postalCode,about, specialRequests ,profilePic} = req.body;
 console.log(_id)
-    // Find the user by _id
+
     const user = await User.findById(_id);
 
     // Update user details
@@ -165,7 +165,10 @@ console.log(_id)
     user.state = state;
     user.postalCode = postalCode;
     user.specialRequests = specialRequests;
-
+    user.about = about;
+    user.city = city;
+    user.country = country;
+    user.profilePic = profilePic;
     // Save the updated user details
     await user.save();
 

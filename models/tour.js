@@ -45,15 +45,25 @@ const tourDetailsSchema = new mongoose.Schema({
   isGroup:{
     type:Boolean
   },
+  reviews: [
+    {
+      text: String,
+      email: String,
+      comment: String,
+    }
+  ],
   images: [
     {
       type: String, 
     },
   ],
-  cost: {
-    type: String,
-   
-  },
+  cost: [
+    {
+      standardPrice: { type: Number }, // Define standardPrice as a Number
+      deluxePrice: { type: Number }, // Define deluxePrice as a Number
+      premiumPrice: { type: Number }, // Define premiumPrice as a Number
+    },
+  ],
   duration: {
     type: String,
    

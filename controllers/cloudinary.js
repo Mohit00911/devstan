@@ -7,10 +7,10 @@ cloudinary.config({
  const imageUpload=async (req, res) => {
     try {
       console.log(req.body)
-      const file = req.files.file; 
+      // const file = req.files.file; 
       
-      const result = await cloudinary.uploader.upload(file.tempFilePath);
-      res.json({ imageUrl: result.secure_url });
+      // const result = await cloudinary.uploader.upload(file.tempFilePath);
+      // res.json({ imageUrl: result.secure_url });
     } catch (error) {
       console.error("Error uploading image:", error);
       res.status(500).json({ error: "Failed to upload image" });

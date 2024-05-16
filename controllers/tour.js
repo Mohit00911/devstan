@@ -1,6 +1,6 @@
 const { connect } = require("mongoose");
 const Tour = require("../models/tour");
-
+const User = require("../models/users");
 const createTour = async (req, res) => {
   try {
     const {
@@ -26,12 +26,18 @@ const createTour = async (req, res) => {
       knowBeforeYouGo,
       additionalInfo,
       tourType,
+      images
     } = req.body;
     const itineraryArray = Object.values(itineraries);
+    const standardPriceNumber = parseFloat(cost[0].standardPrice);
+    const deluxePriceNumber = parseFloat(cost[1].deluxePrice);
+    const premiumPriceNumber = parseFloat(cost[2].premiumPrice);
 
     const existingTour = await Tour.findOne({ uuid: uuid });
 
     if (existingTour) {
+      existingTour.images=images;
+      existingTour.cost = [{ standardPriceNumber }, { deluxePriceNumber }, { premiumPriceNumber }]; 
       existingTour.itineraries=itineraryArray;
       existingTour.tourType = tourType;
       existingTour.overview = overview;
@@ -97,7 +103,7 @@ const createTour = async (req, res) => {
 const getAllTours = async (req, res) => {
   try {
     const { location, tourType, minPrice, maxPrice, durations } = req.body;
-
+// console.log(location) 
     const tours = await Tour.find();
     const filteredTours = tours.filter((tour) => tour.status !== "disabled");
 
@@ -106,9 +112,11 @@ const getAllTours = async (req, res) => {
     
       filteredToursByLocationAndName = filteredTours.filter((tour) => {
         const tourLocation = tour.location && tour.location.toLowerCase();
+        // console.log(tourLocation)
         const tourName = tour.name && tour.name.toLowerCase();
+        // console.log(tourName)
         const matchesLocation = tourLocation === location.toLowerCase();
-
+        console.log(matchesLocation)
         const searchTermWords = location.toLowerCase().split(" ");
         const matchesSearchTerm = searchTermWords.every((word) =>
           tourName.includes(word)
@@ -130,7 +138,7 @@ const getAllTours = async (req, res) => {
     let filteredToursByPrice = filteredToursByType;
     if (minPrice && maxPrice ) {
       filteredToursByPrice = filteredToursByType.filter((tour) => {
-        const tourPrice = parseFloat(tour.cost);
+        const tourPrice = parseFloat(tour.cost[0].standardPrice);
         return (
           !isNaN(tourPrice) && tourPrice >= minPrice && tourPrice <= maxPrice
         );
@@ -184,22 +192,39 @@ const getTourDetails = async (req, res) => {
 const updateTour = async (req, res) => {
   try {
     const { tourId } = req.params;
+    const { comment, email } = req.body;
+
+    if (comment) {
+      const existingTour = await Tour.findOne({ uuid: tourId });
+
+      if (!existingTour) {
+        return res.status(404).json({ error: "Tour not found" });
+      }
+
+    
+      existingTour.reviews.push(req.body);
+
+      const updatedTour = await existingTour.save();
+      return res.json({ message: "Tour updated successfully", tour: updatedTour });
+    }
 
     const updatedTour = await Tour.findOneAndUpdate(
       { uuid: tourId },
-      req.body
+      req.body,
+      { new: true } // This option ensures that the updated document is returned
     );
 
     if (!updatedTour) {
       return res.status(404).json({ error: "Tour not found" });
     }
 
-    res.json({ message: "Tour updated successfully", tour: updatedTour });
+    return res.json({ message: "Tour updated successfully", tour: updatedTour });
   } catch (error) {
     console.error("Error updating tour:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ error: "Internal Server Error" });
   }
 };
+
 const getToursByLocationDate = async (req, res) => {
   try {
     const { location, date } = req.params;

@@ -2,6 +2,7 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 
+const wishlist=require('./controllers/wishlist.js')
 const authRouter = require('./controllers/auth.js');
 const tourController=require('./controllers/tour.js')
 // const imageUploader=require('./controllers/tour.js')
@@ -44,11 +45,13 @@ app.post('/api/tours/:location/:date', tourController.getToursByFilter);
 app.get('/api/getTestimonials', testimonials.getAllTestimonials);
 app.post('/api/createTestimonial', testimonials.createTestimonial);
 app.post('/api/vendorTours', tourController.getToursForVendor);
-app.put('/api/updateTour/:tourId', tourController.updateTour);
+app.post('/api/updateTour/:tourId', tourController.updateTour);
 app.get('/api/getTour/:tourId', tourController.getTourDetails);
 app.get('/api/getkey',(req,res)=>res.status(200).json("rzp_test_51M4AB2hSU08Ih"))
-app.get('/update', imageUploader.imageUpload);
-
+app.post('/uploadImage', imageUploader.imageUpload);
+app.post('/api/addToWishlist', wishlist.addToWishlist);
+app.get('/api/wishlist/:userId', wishlist.getWishlist);
+app.post('/api/removeFromWishlist', wishlist.removeFromWishlist);
 
 app.get('/', (req, res) => { 
   res.send('Hello, Express with MongoDB!');
